@@ -60,13 +60,3 @@ CREATE TABLE transactions (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (service_code) REFERENCES services(service_code)
 );
-
--- Tabel Payment (contoh transaksi pembayaran)
-CREATE TABLE payments (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id),
-    type VARCHAR(50), -- Pulsa, Voucher Game, dll.
-    amount DECIMAL(10, 2),
-    status VARCHAR(50), -- Pending, Success, Failed
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
