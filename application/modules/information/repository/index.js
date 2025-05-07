@@ -1,6 +1,6 @@
 const db = require('../../../../lib/mysql'); 
 
-class UserRepository {
+class InformationRepository {
 
     async getBanners() {
         try {
@@ -24,4 +24,4 @@ class UserRepository {
 
 }
 
-module.exports = UserRepository;
+module.exports = InformationRepository;

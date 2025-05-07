@@ -16,6 +16,10 @@ const InformationHandler = require('./modules/information/delivery');
 const InformationRepository = require('./modules/information/repository');
 const InformationUsecase = require('./modules/information/usecase');
 
+const TransactionHandler = require('./modules/transaction/delivery');
+const TransactionRepository = require('./modules/transaction/repository');
+const TransactionUsecase = require('./modules/transaction/usecase');
+
 const upload = require('../lib/middleware/multer_upload');
 const errorHandler = require('../lib/middleware/error_handler');
 const path = require('path');
@@ -57,6 +61,7 @@ app.get(
 app.put(
     '/profile/update', 
     jwt.verify,
+    validateRequest.validateUpdateProfileRequest,
     (req, res) => userHandler.updateProfile(req, res)
 );
 
@@ -80,6 +85,30 @@ app.get(
     '/services', 
     (req, res) => informationHandler.getServices(req, res)
 );
+
+// Module Transaction
+const transactionRepository = new TransactionRepository();
+const transactionUsecase = new TransactionUsecase(transactionRepository);
+const transactionHandler = new TransactionHandler(transactionUsecase);
+
+app.get(
+    '/balance', 
+    jwt.verify,
+    (req, res) => transactionHandler.getBalance(req, res)
+);
+
+app.get(
+    '/topup', 
+    jwt.verify,
+    validateRequest.validateTopupRequest,
+    (req, res) => transactionHandler.topUp(req, res)
+);
+
+// app.get(
+//     '/services', 
+//     (req, res) => informationHandler.getServices(req, res)
+// );
+
 
 app.use(errorHandler);
 
