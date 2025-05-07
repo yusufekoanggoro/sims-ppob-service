@@ -1,16 +1,23 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const AuthHandler = require('./modules/auth/delivery');
-const validateRequest = require('./middleware/validate_request');
-const AuthUsecase = require('./modules/auth/usecase');
-const AuthRepository = require('./modules/auth/repository');
 const db = require('../lib/mysql');
 const Jwt = require('../lib/token/jwt');
+
+const AuthHandler = require('./modules/auth/delivery');
+const validateRequest = require('../lib/middleware/validate_request');
+const AuthUsecase = require('./modules/auth/usecase');
+const AuthRepository = require('./modules/auth/repository');
+
 const UserHandler = require('./modules/user/delivery');
 const UserRepository = require('./modules/user/repository');
 const UserUsecase = require('./modules/user/usecase');
-const upload = require('./middleware/multer_upload');
-const errorHandler = require('./middleware/error_handler');
+
+const InformationHandler = require('./modules/information/delivery');
+const InformationRepository = require('./modules/information/repository');
+const InformationUsecase = require('./modules/information/usecase');
+
+const upload = require('../lib/middleware/multer_upload');
+const errorHandler = require('../lib/middleware/error_handler');
 const path = require('path');
 
 const app = express();
@@ -19,7 +26,6 @@ const port = 3000;
 app.use(bodyParser.json());
 
 const jwt = new Jwt();
-
 const authRepository = new AuthRepository();
 const authUsecase = new AuthUsecase(authRepository, jwt);
 const authHandler = new AuthHandler(authUsecase);
@@ -37,7 +43,7 @@ app.post(
 );
 
 const userRepository = new UserRepository();
-const userUsecase = new UserUsecase(userRepository, jwt);
+const userUsecase = new UserUsecase(userRepository);
 const userHandler = new UserHandler(userUsecase);
 
 app.use('/uploads', express.static(path.join(__dirname, '..' ,'uploads')));
@@ -59,6 +65,20 @@ app.put(
     jwt.verify, 
     upload.single('image'),
     (req, res) => userHandler.updateProfileImage(req, res)
+);
+
+const informationRepository = new InformationRepository();
+const informationUsecase = new InformationUsecase(informationRepository);
+const informationHandler = new InformationHandler(informationUsecase);
+
+app.get(
+    '/banner', 
+    (req, res) => informationHandler.getBanners(req, res)
+);
+
+app.get(
+    '/services', 
+    (req, res) => informationHandler.getServices(req, res)
 );
 
 app.use(errorHandler);
