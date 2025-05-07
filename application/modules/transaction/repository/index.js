@@ -46,10 +46,11 @@ class TransactionRepository {
                 service_code,
                 transaction_type,
                 total_amount,
+                description,
             } = data;
 
-            const insertSql = 'INSERT INTO transactions (invoice_number, user_id, service_code, transaction_type, total_amount, created_on) VALUES (?, ?, ?, ?, ?, NOW())';
-            const params = [invoice_number, user_id, service_code, transaction_type, total_amount];
+            const insertSql = 'INSERT INTO transactions (invoice_number, user_id, service_code, transaction_type, total_amount, description, created_on) VALUES (?, ?, ?, ?, ?, ?, NOW())';
+            const params = [invoice_number, user_id, service_code, transaction_type, total_amount, description];
 
             if (trx) {
                 return await trx.query(insertSql, params);
@@ -128,6 +129,39 @@ class TransactionRepository {
             }
 
             await db.query(updateSql, params);
+        } catch (error) {
+            console.log(error);
+            throw new Error(error);
+        }
+    }
+
+    async getTransactionDetailPaginated(userId, limit = 0, offset = 0) {
+        try {
+            let query = `
+                SELECT 
+                    t.invoice_number,
+                    t.transaction_type,
+                    t.description,
+                    t.total_amount,
+                    t.created_on
+                FROM 
+                    transactions t
+                LEFT JOIN 
+                    services s ON t.service_code = s.service_code
+                WHERE 
+                    t.user_id = ?
+                ORDER BY 
+                    t.created_on DESC
+            `;
+
+            const params = [userId];
+            if (limit > 0) {
+                query += ` LIMIT ? OFFSET ?`;
+                params.push(parseInt(limit), parseInt(offset));
+            }
+
+            const rows = await db.query(query, params);
+            return rows;
         } catch (error) {
             console.log(error);
             throw new Error(error);

@@ -54,6 +54,7 @@ CREATE TABLE transactions (
     service_code VARCHAR(50),
     transaction_type VARCHAR(20) NOT NULL,
     total_amount BIGINT NOT NULL,
+    description VARCHAR(50),
     created_on TIMESTAMP NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

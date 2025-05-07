@@ -111,6 +111,13 @@ app.post(
     (req, res) => transactionHandler.transaction(req, res)
 );
 
+app.get(
+    '/transaction/history', 
+    jwt.verify,
+    validateRequest.validateTransactionHistoryRequest,
+    (req, res) => transactionHandler.transactionHistory(req, res)
+);
+
 app.use(errorHandler);
 
 process.on('SIGINT', () => {

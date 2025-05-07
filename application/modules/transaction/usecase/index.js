@@ -37,7 +37,8 @@ class TransactionUsecase {
                 user_id: foundUser.id,
                 service_code: null,
                 transaction_type: 'TOPUP',
-                total_amount: payload.amount
+                total_amount: payload.amount,
+                description: 'Top Up balance',
             };
 
             await this.transactionRepository.insertTransaction(data, trx);
@@ -124,7 +125,8 @@ class TransactionUsecase {
                 user_id: foundUser.id,
                 service_code: foundService.service_code,
                 transaction_type: 'PAYMENT',
-                total_amount: payload.amount
+                total_amount: payload.amount,
+                description: foundService.service_name,
             };
 
             await this.transactionRepository.insertTransaction(data, trx);
@@ -141,7 +143,34 @@ class TransactionUsecase {
             throw error;
         }
     }
-  
+
+    async transactionHistory(payload) {
+        const trx = await db.beginTransaction();
+        try {
+            const foundUser = await this.transactionRepository.findUserByEmail(payload.email);
+            if (!foundUser) {
+                const error = new Error('Token tidak tidak valid atau kadaluwarsa');
+                error.statusCode = 401;
+                error.status = 108;
+                error.data = null;
+                throw error;
+            }
+
+            const offset = payload.offset;
+            const limit = payload.limit;
+
+            const transactions = await this.transactionRepository.getTransactionDetailPaginated(foundUser.id, limit, offset);
+
+            return {
+                offset: offset,
+                limit: limit,
+                records: transactions,
+            };
+        } catch (error) {
+            await trx.rollback();
+            throw error;
+        }
+    }
     
 }
 
