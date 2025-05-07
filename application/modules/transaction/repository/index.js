@@ -24,9 +24,39 @@ class TransactionRepository {
 
     async updateUserBalance(email, amount) {
         try {
-            console.log(email, amount)
             const updateSql = 'UPDATE users SET balance = balance + ? WHERE email = ?';
             await db.query(updateSql, [amount, email]);
+        } catch (error) {
+            console.log(error)
+            throw new Error(error);
+        }
+    }
+
+    async insertTransaction(data) {
+        try {
+            const {
+                invoice_number,
+                user_id,
+                service_code,
+                transaction_type,
+                total_amount,
+            } = data;
+
+            const insertSql = 'INSERT INTO transactions (invoice_number, user_id, service_code, transaction_type, total_amount, created_on) VALUES (?, ?, ?, ?, ?, NOW())';
+            await db.query(insertSql, [invoice_number, user_id, service_code, transaction_type, total_amount]);
+        } catch (error) {
+            console.log(error)
+            throw new Error(error);
+        }
+    }
+
+    async getLastInvoiceNumber(dateFormatted) {
+        try {
+            const rows = await db.query(
+                `SELECT invoice_number FROM transactions WHERE invoice_number LIKE ? ORDER BY invoice_number DESC LIMIT 1`,
+                [`INV${dateFormatted}-%`]
+            );
+            return rows;
         } catch (error) {
             console.log(error)
             throw new Error(error);

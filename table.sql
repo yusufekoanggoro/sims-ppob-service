@@ -1,11 +1,11 @@
 -- Tabel Users
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id INTEGER AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(100),
     last_name VARCHAR(100),
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    balance DECIMAL(10, 2) DEFAULT 0,
+    balance INTEGER DEFAULT 0,
     profile_image VARCHAR(255)
 );
 
@@ -27,8 +27,7 @@ INSERT INTO banners (banner_name, banner_image, description) VALUES
 
 -- Tabel Services
 CREATE TABLE services (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    service_code VARCHAR(50) NOT NULL,
+    service_code VARCHAR(50) PRIMARY KEY,
     service_name VARCHAR(255) NOT NULL,
     service_icon VARCHAR(255) NOT NULL,
     service_tariff INT NOT NULL
@@ -50,12 +49,15 @@ INSERT INTO services (service_code, service_name, service_icon, service_tariff) 
 
 -- Tabel Transactions
 CREATE TABLE transactions (
-    id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(id) ON DELETE CASCADE,
-    type VARCHAR(50) NOT NULL,  -- TopUp, Payment
-    amount DECIMAL(10, 2) NOT NULL,
-    description TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    invoice_number VARCHAR(50) PRIMARY KEY,
+    user_id INTEGER NOT NULL, 
+    service_code VARCHAR(50),
+    transaction_type VARCHAR(20) NOT NULL,
+    total_amount BIGINT NOT NULL,
+    created_on TIMESTAMP NOT NULL,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (service_code) REFERENCES services(service_code)
 );
 
 -- Tabel Payment (contoh transaksi pembayaran)
