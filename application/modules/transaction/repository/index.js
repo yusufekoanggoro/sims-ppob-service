@@ -22,17 +22,23 @@ class TransactionRepository {
         }
     }
 
-    async updateUserBalance(email, amount) {
+    async addUserBalance(email, amount, trx) {
         try {
             const updateSql = 'UPDATE users SET balance = balance + ? WHERE email = ?';
-            await db.query(updateSql, [amount, email]);
+            const params = [amount, email];
+
+            if (trx) {
+                return await trx.query(updateSql, params);
+            }
+
+            await db.query(updateSql, params);
         } catch (error) {
             console.log(error)
             throw new Error(error);
         }
     }
 
-    async insertTransaction(data) {
+    async insertTransaction(data, trx) {
         try {
             const {
                 invoice_number,
@@ -43,7 +49,13 @@ class TransactionRepository {
             } = data;
 
             const insertSql = 'INSERT INTO transactions (invoice_number, user_id, service_code, transaction_type, total_amount, created_on) VALUES (?, ?, ?, ?, ?, NOW())';
-            await db.query(insertSql, [invoice_number, user_id, service_code, transaction_type, total_amount]);
+            const params = [invoice_number, user_id, service_code, transaction_type, total_amount];
+
+            if (trx) {
+                return await trx.query(insertSql, params);
+            }
+
+            return await db.query(insertSql, params);
         } catch (error) {
             console.log(error)
             throw new Error(error);
@@ -59,6 +71,65 @@ class TransactionRepository {
             return rows;
         } catch (error) {
             console.log(error)
+            throw new Error(error);
+        }
+    }
+
+    async findServiceByCode(serviceCode) {
+        try {
+            const sql = 'SELECT * FROM services WHERE service_code = ?';
+            const rows = await db.query(sql, [serviceCode]);
+            return rows[0];
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    async getTransactionDetailByInvoiceNumber(invoiceNumber, trx) {
+        try {
+            const query = `
+                SELECT 
+                    t.invoice_number,
+                    t.service_code,
+                    s.service_name,
+                    t.transaction_type,
+                    t.total_amount,
+                    t.created_on
+                FROM 
+                    transactions t
+                JOIN 
+                    users u ON t.user_id = u.id
+                LEFT JOIN 
+                    services s ON t.service_code = s.service_code
+                WHERE 
+                    t.invoice_number = ?
+                LIMIT 1;
+            `;
+            const params = [invoiceNumber];
+            
+            if (trx) {
+                return await trx.query(query, params);
+            }
+
+            const rows = await db.query(query, params);
+            return rows[0] || null;
+        } catch (error) {
+            throw new Error(error);
+        }
+    }
+
+    async subtractUserBalance(email, amount, trx) {
+        try {
+            const updateSql = 'UPDATE users SET balance = balance - ? WHERE email = ?';
+            const params = [amount, email];
+
+            if (trx) {
+                return await trx.query(updateSql, params);
+            }
+
+            await db.query(updateSql, params);
+        } catch (error) {
+            console.log(error);
             throw new Error(error);
         }
     }

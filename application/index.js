@@ -97,18 +97,19 @@ app.get(
     (req, res) => transactionHandler.getBalance(req, res)
 );
 
-app.get(
+app.post(
     '/topup', 
     jwt.verify,
     validateRequest.validateTopupRequest,
     (req, res) => transactionHandler.topUp(req, res)
 );
 
-// app.get(
-//     '/services', 
-//     (req, res) => informationHandler.getServices(req, res)
-// );
-
+app.post(
+    '/transaction', 
+    jwt.verify,
+    validateRequest.validateTransactionRequest,
+    (req, res) => transactionHandler.transaction(req, res)
+);
 
 app.use(errorHandler);
 
