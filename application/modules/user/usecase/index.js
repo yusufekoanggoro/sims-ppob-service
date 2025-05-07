@@ -24,6 +24,9 @@ class UserUsecase {
             delete foundUser.id;
             delete foundUser.balance;
             delete foundUser.password;
+
+            const baseUrl = `${process.env.BASE_URL}`;
+            foundUser.profile_image = `${baseUrl}/${foundUser.profile_image}`
             
             return foundUser;
         } catch (error) {
