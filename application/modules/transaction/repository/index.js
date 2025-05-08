@@ -155,7 +155,7 @@ class TransactionRepository {
             `;
 
             const params = [userId];
-            if (limit > 0) {
+            if (parseInt(limit) > 0) {
                 query += ` LIMIT ? OFFSET ?`;
                 params.push(parseInt(limit), parseInt(offset));
             }
