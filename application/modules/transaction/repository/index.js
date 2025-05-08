@@ -156,8 +156,11 @@ class TransactionRepository {
 
             const params = [userId];
             if (parseInt(limit) > 0) {
-                query += ` LIMIT ? OFFSET ?`;
-                params.push(parseInt(limit), parseInt(offset));
+                // query += ` LIMIT ? OFFSET ?`;
+                // params.push(parseInt(limit), parseInt(offset));
+                const safeLimit = parseInt(limit, 10);
+                const safeOffset = parseInt(offset, 10);
+                query += ` LIMIT ${safeLimit} OFFSET ${safeOffset}`;
             }
 
             const rows = await db.query(query, params);
