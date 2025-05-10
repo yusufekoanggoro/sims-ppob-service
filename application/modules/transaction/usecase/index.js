@@ -98,20 +98,8 @@ class TransactionUsecase {
                 throw error;
             }
 
-            // Validasi tarif layanan
-            if (payload.amount !== foundService.service_tariff) {
-                const error = new Error('Jumlah pembayaran tidak sesuai dengan tarif layanan');
-                error.statusCode = 400;
-                error.status = 110;
-                error.data = {
-                    expectedAmount: foundService.service_tariff,
-                    receivedAmount: payload.amount
-                };
-                throw error;
-            }
-
             // Validasi saldo mencukupi
-            if (foundUser.balance < payload.amount) {
+            if (foundUser.balance < foundService.service_tariff) {
                 const error = new Error('Saldo tidak mencukupi untuk melakukan transaksi');
                 error.statusCode = 400;
                 error.status = 109;
@@ -125,7 +113,7 @@ class TransactionUsecase {
                 user_id: foundUser.id,
                 service_code: foundService.service_code,
                 transaction_type: 'PAYMENT',
-                total_amount: payload.amount,
+                total_amount: foundService.service_tariff,
                 description: foundService.service_name,
             };
 
@@ -133,7 +121,7 @@ class TransactionUsecase {
 
             const result = await this.transactionRepository.getTransactionDetailByInvoiceNumber(invoiceNumber, trx);
 
-            await this.transactionRepository.subtractUserBalance(foundUser.email, payload.amount, trx);
+            await this.transactionRepository.subtractUserBalance(foundUser.email, foundService.service_tariff, trx);
 
             await trx.commit();
 

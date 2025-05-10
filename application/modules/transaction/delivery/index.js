@@ -53,7 +53,6 @@ class TransactionHandler {
         try {
             const result = await this.transactionUsecase.transaction({ 
                 email: req.email,
-                amount: req.body.amount,
                 serviceCode: req.body.service_code,
             });
             
